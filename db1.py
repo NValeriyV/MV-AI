@@ -12,10 +12,6 @@ class DataBase():
     def register_users_id(self, user_id):                                 
         with self.connection:
             self.cursor.execute("INSERT INTO user (user_id, balance) VALUES (?, 0)", (user_id,))
- 
-    def addusers_id(self, telephon, users_id):
-        with self.connection:
-            self.cursor.execute("UPDATE users SET users_id = ?", (users_id,))
 
     def get_balance(self, user_id):
         with self.connection:
