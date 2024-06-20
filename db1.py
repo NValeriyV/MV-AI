@@ -11,10 +11,9 @@ class DataBase():
 
     def register_users_id(self, user_id):                                 
         with self.connection:
-            self.cursor.execute("INSERT INTO user (user_id, balance) VALUES (?, 0)", (user_id,))
+            self.cursor.execute("INSERT INTO users (user_id, balance, isDownload) VALUES (?, 0, 1)", (user_id,))
 
     def get_balance(self, user_id):
-        with self.connection:
             self.cursor.execute("SELECT balance FROM users WHERE user_id = ?", (user_id,))
             result = self.cursor.fetchone()[0]
             return result
@@ -39,7 +38,40 @@ class DataBase():
     def update_subscribe(self, user_id, podpiska):
         with self.connection:
             self.cursor.execute("UPDATE users SET podpiska = ? WHERE user_id = ?", (podpiska, user_id,))
+        
+    def true_user_id(self, user_id):
+        with self.connection:
+            self.cursor.execute("SELECT balance FROM users WHERE user_id = ?", (user_id,))
+            try:
+                self.cursor.fetchone()[0]
+                return True
+            except:
+                return False
     
+    def isDownload(self, user_id):
+        with self.connection:
+            self.cursor.execute("SELECT isDownload FROM users WHERE user_id = ?", (user_id,))
+            try:
+                self.cursor.fetchone()[0]
+                return True
+            except:
+                return False
+            
+    def check_balance(self, balance, amount_symbol, user_id):
+        with self.connection:
+            if balance >= amount_symbol / 10:
+                self.cursor.execute("SELECT balance FROM users WHERE user_id = ?", (user_id,))
+                balance = self.cursor.fetchone()[0] 
+                return True
+            else:
+                return False
 
-kl = DataBase ("Database.db")
+            
+           
 
+
+
+cl = DataBase('test.db')
+print(cl.check_balance(balance=4, amount_symbol=30, user_id=612079984)
+    
+    
