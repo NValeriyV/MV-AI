@@ -65,5 +65,22 @@ class DataBase():
                 return True
             else:
                 return False
-    
-    
+
+    def set_mode(self, mode):
+        with self.connection:
+            self.cursor.execute("UPDATE users SET mode= ?", (mode,))
+
+    def amount_audio(self, user_id, video, s, amount_audio):
+        with self.connection:
+            if s == '+':
+                self.cursor.execute("SELECT amount_audio FROM users WHERE user_id = ?", (user_id,))
+                balance = self.cursor.fetchone()[0] + video
+                self.cursor.execute("UPDATE users SET amount_audio = ? WHERE user_id = ?", (amount_audio, user_id,))
+        
+    def total_audio(self, user_id):
+        with self.connection:
+            self.cursor.execute("SELECT amount_audio FROM users WHERE user_id")
+            user_id = self.cursor.fetchone()[0]
+
+kl = DataBase('test.db')
+print = kl.check_balance(balance=4, amount_symbol=30, user_id=612079984)    
