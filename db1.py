@@ -65,13 +65,5 @@ class DataBase():
                 return True
             else:
                 return False
-
-            
-           
-
-
-
-cl = DataBase('test.db')
-print(cl.check_balance(balance=4, amount_symbol=30, user_id=612079984)
     
     
