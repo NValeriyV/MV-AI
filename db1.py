@@ -81,6 +81,3 @@ class DataBase():
         with self.connection:
             self.cursor.execute("SELECT amount_audio FROM users WHERE user_id")
             user_id = self.cursor.fetchone()[0]
-
-kl = DataBase('test.db')
-print = kl.check_balance(balance=4, amount_symbol=30, user_id=612079984)    
