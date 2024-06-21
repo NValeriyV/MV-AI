@@ -11,7 +11,7 @@ class DataBase():
 
     def register_users_id(self, user_id):                                 
         with self.connection:
-            self.cursor.execute("INSERT INTO users (user_id, balance, isDownload) VALUES (?, 0, 1)", (user_id,))
+            self.cursor.execute("INSERT INTO users (user_id, balance, isDownload) VALUES (?, 1000, 1)", (user_id,))
 
     def get_balance(self, user_id):
             self.cursor.execute("SELECT balance FROM users WHERE user_id = ?", (user_id,))
@@ -79,5 +79,24 @@ class DataBase():
         
     def total_audio(self, user_id):
         with self.connection:
-            self.cursor.execute("SELECT amount_audio FROM users WHERE user_id")
+            self.cursor.execute("SELECT amount_audio FROM users WHERE user_id = ?", (user_id))
             user_id = self.cursor.fetchone()[0]
+
+    def isEnable(self, tokens):
+        with self.connection:
+            self.cursor.execute("UPDATE users SET isEnable WHERE tokens = ?", (tokens))  
+            tokens = self.cursor.fetchone()[0] 
+            return True
+        
+    def change_status_token(self,tokens, user_id):
+        with self.connection:
+            self.cursor.execute("UPDATE users SET tokens = ? WHERE user_id = ?", (tokens, user_id, ))
+
+    def get_tokens_true(self, isEnable):
+        with self.connection:
+            self.cursor.execute("SELECT tokens FROM users WHERE isEnable = ?", (1,))
+
+kl = DataBase('test.db')
+print = kl.check_balance(balance=4, amount_symbol=30, user_id=612079984) 
+
+
