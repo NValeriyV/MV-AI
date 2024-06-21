@@ -9,7 +9,7 @@ bot = AsyncTeleBot('6906669457:AAFBFgK4PUKJEu_M8tGNVBgxu_U0uskx4Zw')
 async def start(message: telebot.types.Message):
     await bot.send_message(message.from_user.id, 'Привет! Я MV AI. Пишу тексты песен по запросам и музыкальное сопровождение. Чтобы начать,\nвыберите режим.')
 
-@bot.message_handler(commands=["help"])
+@bot.message_hanler(commands=['help'])
 async def start_help(message: telebot.types.Message):
     main_buttons = InlineKeyboardMarkup()
     how_generate_music = InlineKeyboardButton('1', callback_data='var1')
@@ -18,6 +18,12 @@ async def start_help(message: telebot.types.Message):
     how_generate_music3 = InlineKeyboardButton('4', callback_data='var4')
     main_buttons.add(how_generate_music, how_generate_music1, how_generate_music2, how_generate_music3)
     await bot.send_message(message.from_user.id, "Частые вопросы:\n1. Как сгенерировать песню?\n2. Как сгенерировать голос?\n3. Голос будет правдоподобным?\n4. Можно будет добавить свой голос?", reply_markup=main_buttons)
+
+@bot.message_handler
+async def start_mess(message: telebot.types.Message):
+    await bot.send_message (message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!")
+    await bot.send_message (message.from_user.id,  "К сожалению, в данный момент наши операторы заняты и занимаются другими запросами. Ваш вопрос очень важен для вас и мы пытаемся обработать его как можно скорее. ")
+
 
 @bot.callback_query_handler(func=lambda call: True)
 async def start_callback(call):
