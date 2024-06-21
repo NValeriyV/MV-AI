@@ -22,7 +22,7 @@ async def start_help(message: telebot.types.Message):
 @bot.message_handler
 async def start_mess(message: telebot.types.Message):
     await bot.send_message (message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!")
-    await bot.send_message (message.from_user.id,  "К сожалению, в данный момент наши операторы заняты и занимаются другими запросами. Ваш вопрос очень важен для вас и мы пытаемся обработать его как можно скорее. ")
+    await bot.send_message (message.from_user.id,  "Дождитесь пока нейросеть обработует предыдущий запрос!")
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -38,6 +38,7 @@ async def start_callback(call):
     if call.data == 'var4':
         print('hello')
         await bot.send_message(call.from_user.id, 'Эта функция пока находится на разбработке.')
+        
 
 async def main():
     await bot.infinity_polling()
