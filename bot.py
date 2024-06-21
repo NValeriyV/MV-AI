@@ -25,12 +25,12 @@ async def start_help(message: telebot.types.Message):
 
 @bot.message_handler()
 async def start_mess(message: telebot.types.Message):
-    if db.check_balance(db.get_balance(), len(message.text), message.from_user.id):             
+    if db.check_balance(db.get_balance(message.from_user.id), len(message.text), message.from_user.id):             
         print('SUCCES BALANCE')
-    await audio_ai(text=message.text, option='MALE', music_name=message.from_user.id, user_id=message.from_user.id)
-    if db.isDownload == True:
+        #await audio_ai(text=message.text, option='MALE', music_name=message.from_user.id, user_id=message.from_user.id)
+    if db.isDownload(message.from_user.id) == True:
         await bot.send_message(message.from_user.id, "Ваш вопрос очень важен для нас и мы пытаемся обработать его как можно скорее.") 
-    elif db.isDownload == False:
+    elif db.isDownload(message.from_user.id) == False:
         await bot.send_message(message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!") 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -38,13 +38,10 @@ async def start_callback(call):
     if call.data == 'var1':
         await bot.send_message(call.from_user.id, 'Вам нужно просто написать о чем будет песня, ключевые слова и любые другие характеристики.')
     if call.data == 'var2':
-        print('hello')
         await bot.send_message(call.from_user.id, 'Выберите режим голоса, после чего отправьте нам текст песни.')
     if call.data == 'var3':
-        print('hello')
         await bot.send_message(call.from_user.id, 'Результат может зависеть от качества источника звука и настройки параметров голоса. Я стараюсь создать натуральный звучащщий голос,который будет соответствовать вашим ожиданиям.')
     if call.data == 'var4':
-        print('hello')
         await bot.send_message(call.from_user.id, 'Эта функция пока находится на разбработке.')
 
 async def main():
