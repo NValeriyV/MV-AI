@@ -1,5 +1,6 @@
 import asyncio
 import telebot
+import subprocess
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from config import TOKEN
@@ -23,7 +24,16 @@ async def start_help(message: telebot.types.Message):
 
 @bot.message_handler()
 async def start_mess(message: telebot.types.Message):
-    await audio_ai(text=message.text, option='MALE', music_name=message.from_user.id, user_id=message.from_user.id)
+    args_list = [
+                    'python3',
+                    'api.py',
+                    str(message.text),
+                    f'MALE',
+                    str(message.from_user.id), 
+                    str(message.from_user.id), 
+                ]
+    subprocess.Popen(args_list)
+    #await audio_ai(text=message.text, option='MALE', music_name=message.from_user.id, user_id=message.from_user.id)
 
 @bot.callback_query_handler(func=lambda call: True)
 async def start_callback(call):
