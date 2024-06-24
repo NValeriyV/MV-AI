@@ -1,21 +1,14 @@
 import asyncio
 import telebot
+import subprocess
 from telebot.async_telebot import AsyncTeleBot
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
+from config import TOKEN
 from db1 import DataBase
 
 db = DataBase('test.db')
 
-bot = AsyncTeleBot('6906669457:AAFBFgK4PUKJEu_M8tGNVBgxu_U0uskx4Zw')
-import asyncio
-import telebot
-from telebot.async_telebot import AsyncTeleBot
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
-from config import TOKEN
-from api import audio_ai
-from db1 import DataBase
-
 bot = AsyncTeleBot(TOKEN)
-db = DataBase()
 
 @bot.message_handler(commands=['start'])
 async def start(message: telebot.types.Message):
@@ -35,13 +28,23 @@ async def start_help(message: telebot.types.Message):
 
 @bot.message_handler()
 async def start_mess(message: telebot.types.Message):
-    if db.check_balance(db.get_balance(), len(message.text), message.from_user.id):             
-        print('SUCCES BALANCE')
-    await audio_ai(text=message.text, option='MALE', music_name=message.from_user.id, user_id=message.from_user.id)
     if db.isDownload == True:
         await bot.send_message(message.from_user.id, "Ваш вопрос очень важен для нас и мы пытаемся обработать его как можно скорее.") 
     elif db.isDownload == False:
         await bot.send_message(message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!") 
+
+@bot.message_handler()
+async def start_mess(message: telebot.types.Message):
+    if db.check_balance(db.get_balance(message.from_user.id), len(message.text), message.from_user.id):      
+        args_list = [
+                        'python3',
+                        'api.py',
+                        str(message.text),
+                        f'MALE',
+                        str(message.from_user.id), 
+                        str(message.from_user.id), 
+                    ]
+        subprocess.Popen(args_list)
 
 @bot.callback_query_handler(func=lambda call: True)
 async def start_callback(call):
