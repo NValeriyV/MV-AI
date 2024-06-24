@@ -67,7 +67,7 @@ def audio_ai(text, option, music_name, user_id):
                 break
 
         except:
-            #запрос на изменение токена
+            #запрос на изменение статуса токена в False (Валера)
             pass
 
 #audio_ai(text='Patrik, shto tyi tut delaesh, kopayu. Zahem tyi nadel mou keplu - ne znaju', option='MALE', music_name='yola', user_id=5500790836)
