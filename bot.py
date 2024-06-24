@@ -26,12 +26,12 @@ async def start_help(message: telebot.types.Message):
     main_buttons.add(how_generate_music, how_generate_music1, how_generate_music2, how_generate_music3)
     await bot.send_message(message.from_user.id, "Частые вопросы:\nКак сгенерировать песню?\nКак сгенерировать голос?\nГолос будет правдоподобным?\nМожно будет добавить свой голос?", reply_markup=main_buttons)
 
-@bot.message_handler()
+'''@bot.message_handler()
 async def start_mess(message: telebot.types.Message):
-    if db.isDownload == True:
+    if db.isDownload(message.from_user.id) == True:
         await bot.send_message(message.from_user.id, "Ваш вопрос очень важен для нас и мы пытаемся обработать его как можно скорее.") 
     elif db.isDownload == False:
-        await bot.send_message(message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!") 
+        await bot.send_message(message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!") '''
 
 @bot.message_handler()
 async def start_mess(message: telebot.types.Message):
