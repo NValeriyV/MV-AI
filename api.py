@@ -1,11 +1,18 @@
 import requests
 import json
+import sys
+import asyncio
 from config import TOKEN
+from db1 import DataBase
 
-def audio_ai(text, option, music_name, user_id):
+db = DataBase('test.db')
+
+async def audio_ai(text, option, music_name, user_id):
     while True:
+        # отправляем запрос неиронке
+        print('Отправляем запрос на генерацию песни!')
         url = "https://api.edenai.run/v2/audio/text_to_speech"
-        list_token = ['986578657685'] #тут должен быть запрос Валеры
+        list_token = db.get_tokens_true()
 
         headers = {"Authorization": f"Bearer {list_token[0]}"}
         data = {
@@ -19,6 +26,8 @@ def audio_ai(text, option, music_name, user_id):
         response = requests.post(url, headers=headers, json=data)
         with open(f'{music_name}.json', 'w', encoding='utf-8') as file:
             file.write(response.text)
+        
+        
 
         with open(f'{music_name}.json', 'r') as file:
             json_data = json.load(file)
@@ -32,31 +41,28 @@ def audio_ai(text, option, music_name, user_id):
                 file.write(res.content)
 
             print("Аудиофайл успешно сохранен как audio.mp3")
-
+            
+            # отправляет в телеграмм
             bot_token = TOKEN
 
             # Путь к аудиофайлу
+            #audio_file_path = f'{music_name}.mp3'
             audio_file_path = f'{music_name}.mp3'
+            print('test')
 
             # URL для отправки аудиофайла
             url = f'https://api.telegram.org/bot{bot_token}/sendAudio'
 
             # Открытие аудиофайла в бинарном режиме
-            with open(audio_file_path, 'rb') as audio:
-                # Параметры запроса
-                payload = {
-                    'chat_id': user_id,
-                    'title': 'Audio File',
-                    'parse_mode': 'Markdown'
-                }
-                
-                # Файлы для отправки
+            print(user_id)
+            with open(audio_file_path, 'rb') as f:
                 files = {
-                    'audio': audio
+                    'audio': f
                 }
+                data = {'chat_id': user_id}
                 
                 # Отправка POST-запроса на сервер Telegram
-                response = requests.post(url, data=payload, files=files)
+                response = requests.post(url, data=data, files=files)
                 
                 # Проверка успешности отправки
                 if response.status_code == 200:
@@ -68,6 +74,15 @@ def audio_ai(text, option, music_name, user_id):
 
         except:
             #запрос на изменение статуса токена в False (Валера)
-            pass
+            db.change_status_token(list_token[0])
 
-#audio_ai(text='Patrik, shto tyi tut delaesh, kopayu. Zahem tyi nadel mou keplu - ne znaju', option='MALE', music_name='yola', user_id=5500790836)
+'''async def main():
+    await audio_ai(text='Patrik, shto tyi tut delaesh, kopayu. Zahem tyi nadel mou keplu - ne znaju', option='MALE', music_name='yola', user_id=5500790836)
+
+asyncio.run(main())
+'''
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(audio_ai(*args))
