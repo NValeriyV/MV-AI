@@ -88,15 +88,11 @@ class DataBase():
             tokens = self.cursor.fetchone()[0] 
             return True
         
-    def change_status_token(self,tokens, user_id):
+    def change_status_token(self, token, isEnable):
         with self.connection:
-            self.cursor.execute("UPDATE users SET tokens = ? WHERE user_id = ?", (tokens, user_id, ))
+            self.cursor.execute("UPDATE tokens SET isEnable = ? WHERE token = ?", (isEnable, token,))
 
-    def get_tokens_true(self, isEnable):
+    def get_tokens_true(self):
         with self.connection:
-            self.cursor.execute("SELECT tokens FROM users WHERE isEnable = ?", (1,))
-
-kl = DataBase('test.db')
-print = kl.check_balance(balance=4, amount_symbol=30, user_id=612079984) 
-
-
+            self.cursor.execute("SELECT token FROM tokens WHERE isEnable = ?", (1,))
+            return [token[0] for token in self.cursor.fetchall()]
