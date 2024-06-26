@@ -111,13 +111,10 @@ class DataBase():
     def set_time(self,user_id, date):               #установка времени
         with self.connection:
             self.cursor.execute("UPDATE users SET time = ? WHERE user_id = ?", (date, user_id,))
-
-    def get_time(self, time_str):                   #функция не работает 
-        time = datetime.datetime.strptime(time_str, '%H:%M:%S')
-        return time.strftime('%H-%M-%S')
+    
+    def get_time(self):                             #получение текущей даты 
+        t = datetime.now()
+        return t.strftime('%d-%m-%Y')
 
 cl = DataBase('test.db')
-print(cl.set_time(5500790836, '26-06-24'))
-
-
-    
+print(cl.get_time())
