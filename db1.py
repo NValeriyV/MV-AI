@@ -102,7 +102,7 @@ class DataBase():
         
     def set_language(self, language, user_id):      #установка языка
         with self.connection:
-            self.cursor.execute("UPDATE users FROM language = ? WHERE user_id = ?",(language,user_id,))
+            self.cursor.execute("UPDATE users SET language = ? WHERE user_id = ?",(language,user_id,))
 
     def read_language(self, user_id):               #чтение языка
         with self.connection:
@@ -127,4 +127,4 @@ class DataBase():
 
 
 cl = DataBase('test.db')
-print(cl.change_option("FEMALE", 6559857679))
+print(cl.set_language("rus", 6559857679))
