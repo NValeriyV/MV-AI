@@ -71,7 +71,7 @@ class DataBase():
 
     def set_mode(self, mode):   #установка мода
         with self.connection:
-            self.cursor.execute("UPDATE users SET mode= ?", (mode,))
+            self.cursor.execute("UPDATE users SET mode= ? WHERE user_id = ?", (mode,))
 
     def amount_audio(self, user_id, video, s, amount_audio): #прибавление аудио
         with self.connection:
