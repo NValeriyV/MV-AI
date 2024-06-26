@@ -7,7 +7,7 @@ from db1 import DataBase
 
 db = DataBase('test.db')
 
-async def audio_ai(text, option, music_name, user_id):
+async def audio_ai(text, option, music_name, leng, user_id):
     while True:
         # отправляем запрос неиронке
         print('Отправляем запрос на генерацию песни!')
@@ -16,8 +16,8 @@ async def audio_ai(text, option, music_name, user_id):
 
         headers = {"Authorization": f"Bearer {list_token[0]}"}
         data = {
-            "providers": "microsoft,lovoai,google,ibm,amazon",
-            "language": "fr",
+            "providers": "openai",
+            "language": f"{leng}",
             "text": f"{text}",
             "option": f"{option}",
             "settings": {}
@@ -33,7 +33,7 @@ async def audio_ai(text, option, music_name, user_id):
             json_data = json.load(file)
 
         try:
-            music_file = json_data['microsoft']['audio_resource_url']
+            music_file = json_data['openai']['audio_resource_url']
 
             res = requests.get(music_file)
 
@@ -76,13 +76,13 @@ async def audio_ai(text, option, music_name, user_id):
             #запрос на изменение статуса токена в False (Валера)
             db.change_status_token(list_token[0])
 
-'''async def main():
-    await audio_ai(text='Patrik, shto tyi tut delaesh, kopayu. Zahem tyi nadel mou keplu - ne znaju', option='MALE', music_name='yola', user_id=5500790836)
+async def main():
+    await audio_ai(text='filles, garcons, doux comme des caramels ', option='MALE', music_name='yola', user_id=5500790836)
 
 asyncio.run(main())
-'''
 
-if __name__ == "__main__":
+
+'''if __name__ == "__main__":
     args = sys.argv[1:]
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(audio_ai(*args))
+    loop.run_until_complete(audio_ai(*args))'''
