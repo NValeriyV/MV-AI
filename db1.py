@@ -14,7 +14,7 @@ class DataBase():
 
     def register_users_id(self, user_id):              #регистрации_пользователя                   
         with self.connection:
-            self.cursor.execute("INSERT INTO users (user_id, balance, isDownload) VALUES (?, 1000, 1)", (user_id,))
+            self.cursor.execute("INSERT INTO users (user_id, balance, isDownload, option) VALUES (?, 1000, 1, MALE)", (user_id,))
 
     def get_balance(self, user_id):                    #получить баланс
             self.cursor.execute("SELECT balance FROM users WHERE user_id = ?", (user_id,))
@@ -71,7 +71,7 @@ class DataBase():
 
     def set_mode(self, mode):   #установка мода
         with self.connection:
-            self.cursor.execute("UPDATE users SET mode= ?", (mode,))
+            self.cursor.execute("UPDATE users SET mode= ? WHERE user_id = ?", (mode,))
 
     def amount_audio(self, user_id, video, s, amount_audio): #прибавление аудио
         with self.connection:
@@ -111,7 +111,20 @@ class DataBase():
     def set_time(self,user_id, date):               #установка времени
         with self.connection:
             self.cursor.execute("UPDATE users SET time = ? WHERE user_id = ?", (date, user_id,))
+    
+    def get_time(self):                             #получение текущей даты 
+        t = datetime.now()
+        return t.strftime('%d-%m-%Y')
 
-    def get_time(self, time_str):                   #функция не работает 
-        time = datetime.datetime.strptime(time_str, '%H:%M:%S')
-        return time.strftime('%H-%M-%S')
+    def get_option(self, user_id):                  #установка голоса
+        with self.connection:
+            self.cursor.execute("SELECT option FROM users WHERE user_id = ?", (user_id,))
+
+    def change_option(self,option, user_id):        #изменение голоса
+        with self.connection:
+            self.cursor.execute("UPDATE users SET option = ? WHERE user_id = ?", (option, user_id,))
+
+
+
+cl = DataBase('test.db')
+print(cl.change_option("FEMALE", 6559857679))
