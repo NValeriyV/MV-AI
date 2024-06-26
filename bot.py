@@ -26,6 +26,15 @@ async def start_help(message: telebot.types.Message):
     main_buttons.add(how_generate_music, how_generate_music1, how_generate_music2, how_generate_music3)
     await bot.send_message(message.from_user.id, "Частые вопросы:\nКак сгенерировать песню?\nКак сгенерировать голос?\nГолос будет правдоподобным?\nМожно будет добавить свой голос?", reply_markup=main_buttons)
 
+@bot.message_handler(commands=["setting"])
+async def start_setting(message: telebot.types.Message):
+    markup = InlineKeyboardMarkup()
+    btn_main = InlineKeyboardButton("Язык", callback_data='lenguage')
+    btn_main1 = InlineKeyboardButton("Пополнение баланса", callback_data='popolnenie') 
+
+    markup.add(btn_main, btn_main1)
+    await bot.send_message(message.from_user.id, 'Выберите функцию', reply_markup=markup)
+    
 '''@bot.message_handler()
 async def start_mess(message: telebot.types.Message):
     if db.isDownload(message.from_user.id) == True:
