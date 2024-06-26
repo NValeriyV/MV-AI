@@ -115,9 +115,3 @@ class DataBase():
     def get_time(self, time_str):                   #функция не работает 
         time = datetime.datetime.strptime(time_str, '%H:%M:%S')
         return time.strftime('%H-%M-%S')
-
-cl = DataBase('test.db')
-print(cl.set_time(5500790836, '26-06-24'))
-
-
-    
