@@ -1,4 +1,7 @@
 import sqlite3 
+import time
+import datetime
+from datetime import datetime
 
 class DataBase():
     def __init__(self, file):
@@ -96,3 +99,25 @@ class DataBase():
         with self.connection:
             self.cursor.execute("SELECT token FROM tokens WHERE isEnable = ?", (1,))
             return [token[0] for token in self.cursor.fetchall()]
+        
+    def set_language(self, language, user_id):
+        with self.connection:
+            self.cursor.execute("UPDATE users FROM language = ? WHERE user_id = ?",(language,user_id,))
+
+    def read_language(self, user_id):
+        with self.connection:
+            self.cursor.execute("SELECT language FROM users WHERE user_id = ? ",(user_id))
+
+    def set_time(self,user_id, date):
+        with self.connection:
+            self.cursor.execute("UPDATE users SET time = ? WHERE user_id = ?", (date, user_id,))
+
+    def get_time(self, time_str):
+        time = datetime.datetime.strptime(time_str, '%H:%M:%S')
+        return time.strftime('%H-%M-%S')
+
+cl = DataBase('test.db')
+print(cl.set_time(5500790836, '26-06-24'))
+
+
+    
