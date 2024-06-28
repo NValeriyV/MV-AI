@@ -1,263 +1,118 @@
-import json
-import os
-import requests
-import time
-import hmac
-import hashlib
-from config import api_key, api_secret
-from db import Database
+import asyncio
+import telebot
+import subprocess
+from telebot.async_telebot import AsyncTeleBot
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
+from config import TOKEN
+from db1 import DataBase
 
-#вставьте необходимые данные для подключения к базе
-db = Database(apiKey='', authDomain="", projectId="", storageBucket="", messagingSenderId="", appId="", measurementId="", databaseURL="")
+db = DataBase('test.db')
 
-class SetPrice():
-    def __init__(self, bot_token, chat_id):
-        self.bot_token = bot_token
-        self.chat_id = chat_id
+bot = AsyncTeleBot(TOKEN)
+
+@bot.message_handler(commands=['start'])
+async def start(message: telebot.types.Message):
+    if not db.true_user_id(message.from_user.id):
+        db.register_users_id(message.from_user.id)
+    await bot.send_message(message.from_user.id, 'Привет! Я MV AI. Пишу тексты песен по запросам и музыкальное сопровождение. Чтобы начать,\nвыберите режим.')
+
+@bot.message_handler(commands=["help"])
+async def start_help(message: telebot.types.Message):
+    main_buttons = InlineKeyboardMarkup()
+    how_generate_music = InlineKeyboardButton('1 вопрос', callback_data='var1')
+    how_generate_music1 = InlineKeyboardButton('2 вопрос', callback_data='var2')
+    how_generate_music2 = InlineKeyboardButton('3 вопрос', callback_data='var3')
+    how_generate_music3 = InlineKeyboardButton('4 вопрос', callback_data='var4')
+    main_buttons.add(how_generate_music, how_generate_music1, how_generate_music2, how_generate_music3)
+    await bot.send_message(message.from_user.id, "Частые вопросы:\nКак сгенерировать песню?\nКак сгенерировать голос?\nГолос будет правдоподобным?\nМожно будет добавить свой голос?", reply_markup=main_buttons)
+
+@bot.message_handler(commands=["setting"])
+async def start_setting(message: telebot.types.Message):
+    markup = InlineKeyboardMarkup()
+    btn_main = InlineKeyboardButton("Язык", callback_data='lenguage')
+    btn_main1 = InlineKeyboardButton("Пополнение баланса", callback_data='popolnenie') 
+
+    markup.add(btn_main, btn_main1)
+    await bot.send_message(message.from_user.id, 'Выберите функцию', reply_markup=markup)
     
-    def get_orders(self, symbol): #получение ордеров. 
-        api_params = f'category=inverse&symbol={symbol}'
+'''@bot.message_handler()
+async def start_mess(message: telebot.types.Message):
+    if db.isDownload(message.from_user.id) == True:
+        await bot.send_message(message.from_user.id, "Ваш вопрос очень важен для нас и мы пытаемся обработать его как можно скорее.") 
+    elif db.isDownload == False:
+        await bot.send_message(message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!") '''
+
+@bot.message_handler()
+async def start_mess(message: telebot.types.Message):
+    if db.check_balance(db.get_balance(message.from_user.id), len(message.text), message.from_user.id):  
+        print('test1')
+        db.or_balance(message.from_user.id, len(message.text), '-')
+        print('test1') 
+        '''args_list = [
+                        'python3',
+                        'api.py',
+                        str(message.text),
+                        f'MALE',
+                        str(message.from_user.id), 
+                        str(message.from_user.id), 
+                    ]
+        subprocess.Popen(args_list)'''
+    else:
+        print('test2')
+        markup = InlineKeyboardMarkup()
+        btn_main1= InlineKeyboardButton("Пополнение баланса", callback_data='popolnenie')
+        markup.add(btn_main1)
+        await bot.send_message(message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!", reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: True)
+async def start_callback(call):
+    if call.data == 'var1':
+        await bot.send_message(call.from_user.id, 'Вам нужно просто написать о чем будет песня, ключевые слова и любые другие характеристики.')
+    if call.data == 'var2':
+        print('hello')
+        await bot.send_message(call.from_user.id, 'Выберите режим голоса, после чего отправьте нам текст песни.')
+    if call.data == 'var3':
+        print('hello')
+        await bot.send_message(call.from_user.id, 'Результат может зависеть от качества источника звука и настройки параметров голоса. Я стараюсь создать натуральный звучащщий голос,который будет соответствовать вашим ожиданиям.')
+    if call.data == 'var4':
+        print('hello')
+        await bot.send_message(call.from_user.id, 'Эта функция пока находится на разбработке.')
+
+    if call.data == 'popolnenie':
+        if db.get_time_user(call.from_user.id) != db.get_time():
+            db.or_balance(call.from_user.id, 1000, '+')
+            db.set_time(call.from_user.id, db.get_time())
+            await bot.send_message(call.from_user.id,  f'Вы пополнили свой баланс на 1000 токенов. Ваш баланс: {db.get_balance(call.from_user.id)}')
+
+
+    if call.data == 'lenguage':
+        markup = InlineKeyboardMarkup()
+        rus_btn = InlineKeyboardButton('RU 🇷🇺', callback_data='rus')
+        eng_btn = InlineKeyboardButton('ENG 🇬🇧', callback_data='eng')
+        fr_btn = InlineKeyboardButton('FR 🇫🇷', callback_data='fr')
+        de_btn = InlineKeyboardButton('DE 🇩🇪', callback_data='de')
+
+        markup.add(rus_btn, eng_btn, fr_btn, de_btn)
+        await bot.send_message(call.from_user.id, 'Выберите язык:', reply_markup=markup)
+
+    if call.data == 'rus':
+        await bot.send_message(call.from_user.id, 'Вы изменили язык на русский', reply_markup=markup) 
+        db.set_language('rus', call.from_user.id)
+
+    if call.data == 'eng':
+        await bot.send_message(call.from_user.id, 'Вы изменили язык на английский', reply_markup=markup)
+        db.set_language('eng', call.from_user.id)
         
-        url = f"https://api.bybit.com/v5/order/realtime?{api_params}"
+    if call.data == 'fr':
+        await bot.send_message(call.from_user.id, 'Вы изменили язык на французский', reply_markup=markup)
+        db.set_language('fr', call.from_user.id)
 
-        def sign(secret, data):
-            return hmac.new(secret.encode(), data.encode(), hashlib.sha256).hexdigest()
-        
-        timestamp = str(int(time.time() * 1000))
-        recv_window = '20000'
+    if call.data == 'de':
+        await bot.send_message(call.from_user.id, 'Вы изменили язык на немецкий', reply_markup=markup)
+        db.set_language('de', call.from_user.id)
 
-        headers = {
-            'X-BAPI-API-KEY': api_key,
-            'X-BAPI-TIMESTAMP': timestamp,
-            'X-BAPI-RECV-WINDOW': recv_window,
-            'X-BAPI-SIGN': sign(api_secret, f"{timestamp}{api_key}{recv_window}{api_params}")
-        }
-
-        response = requests.get(url, headers=headers)
-        return response.json()
-    
-    def get_price(self, symbol): #получение актуальной цены 
-        api_params = f'category=inverse&symbol={symbol}&interval=1'
-        
-        url = f"https://api.bybit.com/v5/market/mark-price-kline?{api_params}"
-
-        def sign(secret, data):
-            return hmac.new(secret.encode(), data.encode(), hashlib.sha256).hexdigest()
-        
-        timestamp = str(int(time.time() * 1000))
-        recv_window = '20000'
-
-        headers = {
-            'X-BAPI-API-KEY': api_key,
-            'X-BAPI-TIMESTAMP': timestamp,
-            'X-BAPI-RECV-WINDOW': recv_window,
-            'X-BAPI-SIGN': sign(api_secret, f"{timestamp}{api_key}{recv_window}{api_params}")
-        }
-
-        response = requests.get(url, headers=headers)
-        return response.json()
-    
-    def get_balance(self, coin, type): #функция для принятия платежа
-        # Установите метод и вызов API
-        api_method = "GET"
-        api_call = "v5/asset/transfer/query-account-coins-balance"
-
-        # Установите параметры API
-        account_type = type
-        api_params = f"accountType={account_type}&coin={coin}"
-
-        # Установите окно ожидания и отметку времени
-        recv_window = 5000
-        timestamp = str(int(time.time() * 1000))
-
-        # Функция для создания подписи запроса
-        def sign(secret, data):
-            return hmac.new(secret.encode(), data.encode(), hashlib.sha256).hexdigest()
-
-        # Создайте подпись с использованием секретного ключа и параметров API
-        signature = sign(api_secret, f"{timestamp}{api_key}{recv_window}{api_params}")
-
-        # Сформируйте URL и заголовки запроса
-        url = f"https://api.bybit.com/{api_call}?{api_params}"
-        headers = {
-            "X-BAPI-API-KEY": api_key,
-            "X-BAPI-TIMESTAMP": timestamp,
-            "X-BAPI-SIGN": signature,
-            "X-BAPI-RECV-WINDOW": str(recv_window)
-        }
-
-        # Выполните GET запрос
-        response = requests.get(url, headers=headers)
-
-        # Проверьте статус код ответа
-        return response.json()
-    
-    def get_pnl(self, pare): #получение pnl
-        # Установите метод и вызов API
-        api_method = "GET"
-        api_call = "v5/position/closed-pnl"
-
-        # Установите параметры API
-        account_type = type
-        api_params = f"category=inverse&symbol={pare}"
-
-        # Установите окно ожидания и отметку времени
-        recv_window = 5000
-        timestamp = str(int(time.time() * 1000))
-
-        # Функция для создания подписи запроса
-        def sign(secret, data):
-            return hmac.new(secret.encode(), data.encode(), hashlib.sha256).hexdigest()
-
-        # Создайте подпись с использованием секретного ключа и параметров API
-        signature = sign(api_secret, f"{timestamp}{api_key}{recv_window}{api_params}")
-
-        # Сформируйте URL и заголовки запроса
-        url = f"https://api.bybit.com/{api_call}?{api_params}"
-        headers = {
-            "X-BAPI-API-KEY": api_key,
-            "X-BAPI-TIMESTAMP": timestamp,
-            "X-BAPI-SIGN": signature,
-            "X-BAPI-RECV-WINDOW": str(recv_window)
-        }
-
-        # Выполните GET запрос
-        response = requests.get(url, headers=headers)
-
-        # Проверьте статус код ответа
-        return response.json()
-    
-    def main(self, signal_number, amount_signals): #главный алгоритм
-        url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage" #запрос на ТГ бота. 
-
-        data = db.init_data() #подключаемся к базе
-        data = data.get('signals', {}) #получаем данные о токенах
-
-        list_token_database = [] #список токенов для БД
-
-        for value in data['entities']: #получаем список всех ордеров с базы
-            token = value['name'] #токен
-            list_token_database.append(token) #добавляем в список. 
-
-        while True: #начинаем цикл
-            order_num = 0
-            for pare in list_token_database: #проходимся по всему списку. 
-                sl = None
-                qty_tp1 = None
-                qty_tp2 = None
-                qty_sl = None
-                tp = []
-                qty_tp = []
-
-                orders = self.get_orders(pare) # делаем запрос на получение ордера
-                if orders['retCode'] == 0: # проверяем, если ли этот ордер на бирже. 
-                    path = f'data/{pare}.json'
-                    if not os.path.exists(path=path): # проверяем, если у нас json файл с сделками. 
-                        with open(f'data/{pare}.json', 'w', encoding='utf-8') as file:
-                            json.dump(orders, file, indent=4)
-
-                    if len(orders['result']['list']) == 3: #проверяем кол-во ордеров. Если 3, значит есть 2 TP и SL
-                        for key, value in orders.items():
-                            if key == 'result': 
-                                for item in value['list']:
-                                    if item['stopOrderType'] == 'PartialTakeProfit':
-                                        tp.append(item['triggerPrice']) #добавляем TP в список
-                                        qty_tp.append(item['qty']) #добавляем qty
-
-                                    elif item['stopOrderType'] == 'PartialStopLoss':
-                                        sl = item['triggerPrice'] # устанавливаем sl в переменную 
-                                        qty_sl = item['qty']
-
-                        # определяем тейк-профиты. 1 тейк-профит меньший по цене. 
-                        if tp[0] > tp[1]: 
-                            tp2 = tp[0]
-                            tp1 = tp[1]
-
-                            qty_tp1 = qty_tp[1]
-                            qty_tp2 = qty_tp[0]
-                        else:
-                            tp2 = tp[1]
-                            tp1 = tp[0]
-
-                            qty_tp1 = qty_tp[0]
-                            qty_tp2 = qty_tp[1]
-
-                        print(f'TP1 - {tp1}\nTP2 - {tp2}\nSL - {sl}')
-                    
-                    elif len(orders['result']['list']) == 2: #сработает, если tp1 закроется. 
-                        
-                        #тут напиши код который отошлёт уведомление об отправке кода
-
-                        payload = {
-                            "chat_id": self.chat_id, 
-                            "text": f'''#{order_num} TP1 is closed
-                                    Balance: {self.get_balance('USDT', 'CONTRACT')['result']['balance']['walletBalance']}
-                                    Open trades qty: {qty_tp1}
-                                    Unfixed P&L: {self.get_pnl(pare)['result']['list'][0]['closedPnL']}'''
-                        }
-
-                        headers = {
-                            'Content-Type': 'application/json'
-                        }
-
-                        requests.get(url, json=payload, headers=headers)
-
-                        with open(f'data/{pare}.json', 'w', encoding='utf-8') as file: #перезаписываем сделку
-                            json.dump(orders, file, indent=4)
-
-                        for key, value in orders.items():
-                            if key == 'result': 
-                                for item in value['list']:
-                                    if item['stopOrderType'] == 'PartialTakeProfit':
-                                        tp2 = item['triggerPrice']
-
-                                    elif item['stopOrderType'] == 'PartialStopLoss':
-                                        sl = item['triggerPrice']
-
-                        print(f'TP2 - {tp2}\nSL - {sl}')
-
-                    elif len(orders['result']['list']) == 0: #сработает, если закроется SL или TP
-                        try: #пробуем запустить
-                            os.remove(f'data/{pare}.json') #удаляем файл с сделкой
-                        
-                            last_price = self.get_price(pare)['result']['list'][-1][-1] #узнаём актуальную цену на токен
-
-                            if abs(last_price - sl) < abs(last_price - tp2): #если цена будет ближе к прошлому стопу, отправит сообщение о срабатывании стоп-лосса
-                                print('SL') #тут напиши код для отправки кода в тг
-                                headers = {
-                                    'Content-Type': 'application/json'
-                                }
-
-                                payload = {
-                                    "chat_id": self.chat_id, 
-                                    "text": f'''#{order_num} SL is closed
-                                            Balance: {self.get_balance('USDT', 'CONTRACT')['result']['balance']['walletBalance']}
-                                            Open trades qty: {qty_sl}
-                                            Unfixed P&L: {self.get_pnl(pare)['result']['list'][0]['closedPnL']}'''
-                                }
-
-                                requests.get(url)
-                            else: #если ближе к тейк-профиту, тогда отправит сообщение о срабатывании тейк-профита. 
-                                headers = {
-                                    'Content-Type': 'application/json'
-                                }
-
-                                payload = {
-                                    "chat_id": self.chat_id, 
-                                    "text": f'''#{order_num} TP2 is closed
-                                            Balance: {self.get_balance('USDT', 'CONTRACT')['result']['balance']['walletBalance']}
-                                            Open trades qty: {qty_tp2}
-                                            Unfixed P&L: {self.get_pnl(self.pare)['result']['list'][0]['closedPnL']}'''
-                                }
-                                print('TP') #тут напиши код для отправки кода в тг
-                        except:
-                            print('Сделка не была создана!') #сработает, если сделка не велась и SL и TP не было при старте бота. 
-
-                else: #сработает, если появится ошибка при запросе.
-                    print('no')
-
-                order_num += 1
-                time.sleep(3)
+async def main():
+    await bot.infinity_polling()
 
 if __name__ == "__main__":
-    cl = SetPrice(bot_token='', chat_id='')
+    asyncio.run(main())
