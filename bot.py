@@ -57,7 +57,10 @@ async def start_mess(message: telebot.types.Message):
                     ]
         subprocess.Popen(args_list)'''
     else:
-        await bot.send_message(message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!")
+        markup = InlineKeyboardMarkup()
+        btn_main1= InlineKeyboardButton("Пополнение баланса", callback_data='popolnenie')
+        markup.add(btn_main1)
+        await bot.send_message(message.from_user.id, "У вас не хватка средств на балансе. Пополните счет и повторите попытку!", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 async def start_callback(call):
@@ -73,6 +76,10 @@ async def start_callback(call):
         print('hello')
         await bot.send_message(call.from_user.id, 'Эта функция пока находится на разбработке.')
 
+    if call.data == 'popolnenie':
+        db.or_balance(call.from_user.id, 1000, '+')
+        await bot.send_message(call.from_user.id,  f'Вы пополнили свой баланс на 1000 токенов. Ваш баланс: {db.get_balance(call.from_user.id)}')
+
     if call.data == 'lenguage':
         markup = InlineKeyboardMarkup()
         rus_btn = InlineKeyboardButton('RU 🇷🇺', callback_data='rus')
@@ -85,7 +92,6 @@ async def start_callback(call):
 
     if call.data == 'rus':
         await bot.send_message(call.from_user.id, 'Вы изменили язык на русский', reply_markup=markup) 
-        #написать запрос на изменение русского языка
         db.set_language('rus', call.from_user.id)
 
     if call.data == 'eng':

@@ -123,8 +123,3 @@ class DataBase():
     def change_option(self,option, user_id):        #изменение голоса
         with self.connection:
             self.cursor.execute("UPDATE users SET option = ? WHERE user_id = ?", (option, user_id,))
-
-
-
-cl = DataBase('test.db')
-print(cl.set_language("rus", 6559857679))

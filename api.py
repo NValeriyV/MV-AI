@@ -76,13 +76,13 @@ async def audio_ai(text, option, music_name, leng, user_id):
             #запрос на изменение статуса токена в False (Валера)
             db.change_status_token(list_token[0])
 
-async def main():
+'''async def main():
     await audio_ai(text='filles, garcons, doux comme des caramels ', option='MALE', music_name='yola', user_id=5500790836)
 
-asyncio.run(main())
+asyncio.run(main())'''
 
 
-'''if __name__ == "__main__":
+if __name__ == "__main__":
     args = sys.argv[1:]
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(audio_ai(*args))'''
+    loop.run_until_complete(audio_ai(*args))
