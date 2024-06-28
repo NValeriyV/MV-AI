@@ -99,11 +99,15 @@ async def start_callback(call):
         female_btn = InlineKeyboardButton('Женский', callback_data='women')
         markup.add(male_btn, female_btn)
         await bot.send_message(call.from_user.id, 'Выберите голос:', reply_markup=markup)
-    if call.data =='man':
-        pass
     
+    if call.data =='man':
+        db.set_mode(call.from_user.id, 'MALE')
+        await bot.send_message(call.from_user.id, 'Режим голоса изменен на мужской', reply_markup=markup)   
+
+
     if call.data =='women': 
-        pass
+       db.set_mode(call.from_user.id, 'FEMALE')
+       await bot.send_message(call.from_user.id, 'Режим голоса изменен на женский', reply_markup=markup)   
 
     if call.data == 'rus':
         await bot.send_message(call.from_user.id, 'Вы изменили язык на русский', reply_markup=markup) 
